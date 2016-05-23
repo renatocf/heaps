@@ -1,0 +1,4 @@
+[submodule "make"]
+	path = make
+	url = https://github.com/umakefile/make.git
+	ignore = dirty
