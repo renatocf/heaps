@@ -52,6 +52,22 @@ struct Edge {
   friend bool operator>=(const Edge& lhs, const Edge& rhs) {
     return !operator<(lhs, rhs);
   }
+
+  friend std::ostream& operator<<(std::ostream& os, const Edge& e) {
+    os << "(" << e.key << "," << e.weight << ")";
+    return os;
+  }
+
+  friend std::istream& operator>>(std::istream& is, Edge& e) {
+    char c;
+    if (!(is >> c)) return is;
+    if (c != '(') { is.setstate(is.failbit); return is; }
+    if (!(is >> e.key >> c)) return is;
+    if (c != ',') { is.setstate(is.failbit); return is; }
+    if (!(is >> e.weight >> c)) return is;
+    if (c != ')') { is.setstate(is.failbit); return is; }
+    return is;
+  }
 };
 
 }  // namespace graph
