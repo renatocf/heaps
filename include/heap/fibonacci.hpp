@@ -270,7 +270,7 @@ class fibonacci {
    * @return Reference to the root node
    */
   const node_ptr& link(const node_ptr& lhs, const node_ptr& rhs) const {
-    if (lhs->key <= rhs->key) {
+    if (cmp(lhs, rhs)) {
       lhs->children.push_back(rhs);
       rhs->parent = lhs;
       return lhs;
