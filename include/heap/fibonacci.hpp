@@ -62,7 +62,10 @@ class fibonacci {
   };
 
   // Constructors
-  fibonacci(std::initializer_list<key_type> keys = {})
+  fibonacci() : fibonacci({}) {
+  }
+
+  explicit fibonacci(std::initializer_list<key_type> keys)
       : trees(make_trees(keys)), num_elements(keys.size()),
         minimum(search_minimum()),
         cmp([] (const node_ptr& lhs, const node_ptr& rhs) -> bool {

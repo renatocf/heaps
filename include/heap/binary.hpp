@@ -57,7 +57,10 @@ class binary {
   };
 
   // Constructors
-  binary(std::initializer_list<key_type> keys = {}) {
+  binary() : binary({}) {
+  }
+
+  explicit binary(std::initializer_list<key_type> keys) {
     for (const auto& key : keys)
       heap.emplace_back(new node{key});
     std::make_heap(heap.begin(), heap.end());
