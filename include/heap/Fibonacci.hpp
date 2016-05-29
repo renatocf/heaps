@@ -308,10 +308,12 @@ class Fibonacci {
       ++it;
 
       while (root_with_rank[(*curr_it)->rank()] != trees.end()) {
-        auto other_it = root_with_rank[(*curr_it)->rank()];
+        auto curr_rank = (*curr_it)->rank();
+        auto other_it = root_with_rank[curr_rank];
+
         (*other_it) = link(*curr_it, *other_it);
 
-        root_with_rank[(*curr_it)->rank()] = trees.end();
+        root_with_rank[curr_rank] = trees.end();
         trees.erase(curr_it);
 
         curr_it = other_it;
