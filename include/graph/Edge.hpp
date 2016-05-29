@@ -29,8 +29,28 @@ struct Edge {
   Key key;
   Weight weight;
 
+  friend bool operator==(const Edge& lhs, const Edge& rhs) {
+    return lhs.key == rhs.key && lhs.weight == rhs.weight;
+  }
+
+  friend bool operator!=(const Edge& lhs, const Edge& rhs) {
+    return !operator==(lhs, rhs);
+  }
+
   friend bool operator<(const Edge& lhs, const Edge& rhs) {
     return lhs.weight < rhs.weight;
+  }
+
+  friend bool operator<=(const Edge& lhs, const Edge& rhs) {
+    return operator==(lhs, rhs) || operator<(lhs, rhs);
+  }
+
+  friend bool operator>(const Edge& lhs, const Edge& rhs) {
+    return !operator<=(lhs, rhs);
+  }
+
+  friend bool operator>=(const Edge& lhs, const Edge& rhs) {
+    return !operator<(lhs, rhs);
   }
 };
 
