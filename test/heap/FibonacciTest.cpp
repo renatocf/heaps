@@ -20,10 +20,10 @@
 #include "gmock/gmock.h"
 
 // Tested header
-#include "heap/fibonacci.hpp"
+#include "heap/Fibonacci.hpp"
 
 // Aliases
-using fibonacci_heap = heap::fibonacci<int>;
+using FibonacciHeap = heap::Fibonacci<int>;
 
 /*----------------------------------------------------------------------------*/
 /*                             USING DECLARATIONS                             */
@@ -36,16 +36,16 @@ using ::testing::Eq;
 /*----------------------------------------------------------------------------*/
 
 struct AFibonacciHeap : public ::testing::Test {
-  fibonacci_heap fib { 3, 5, 8, 13, 21, 34, 55 };
+  FibonacciHeap fib { 3, 5, 8, 13, 21, 34, 55 };
 
   // Final heap: (03) (05) (08) (13) (21) (34) (55)
 };
 
 struct AReorganizedFibonacciHeap : public ::testing::Test {
-  fibonacci_heap fib;
-  fibonacci_heap::node_ptr node03, node05, node08, node13,
-                           node21, node34, node55, node42,
-                           node24, node33, node72, node88;
+  FibonacciHeap fib;
+  FibonacciHeap::node_ptr node03, node05, node08, node13,
+                          node21, node34, node55, node42,
+                          node24, node33, node72, node88;
 
   AReorganizedFibonacciHeap() : fib() {
     node03 = fib.insert(3);
@@ -69,7 +69,7 @@ struct AReorganizedFibonacciHeap : public ::testing::Test {
 /*----------------------------------------------------------------------------*/
 
 TEST(FibonacciHeap, CanBeEmptyConstructed) {
-  fibonacci_heap fib;
+  FibonacciHeap fib;
 
   ASSERT_THAT(fib.size(), Eq(0u));
   ASSERT_THAT(fib.empty(), Eq(true));
@@ -80,7 +80,7 @@ TEST(FibonacciHeap, CanBeEmptyConstructed) {
 /*----------------------------------------------------------------------------*/
 
 TEST(FibonacciHeap, CanBeConstructedWithOneElement) {
-  fibonacci_heap fib {1};
+  FibonacciHeap fib {1};
 
   ASSERT_THAT(fib.size(), Eq(1u));
   ASSERT_THAT(fib.empty(), Eq(false));
@@ -103,7 +103,7 @@ TEST_F(AFibonacciHeap, CanInsertANewNode) {
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AFibonacciHeap, CanBeMergedWithCopiedFibonacciHeap) {
-  fibonacci_heap oh {1};
+  FibonacciHeap oh {1};
   fib.merge(oh);
 
   ASSERT_THAT(fib.size(), Eq(8u));
@@ -114,7 +114,7 @@ TEST_F(AFibonacciHeap, CanBeMergedWithCopiedFibonacciHeap) {
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AFibonacciHeap, CanBeMergedWithMovedFibonacciHeap) {
-  fibonacci_heap oh {1};
+  FibonacciHeap oh {1};
   fib.merge(std::move(oh));
 
   ASSERT_THAT(fib.size(), Eq(8u));

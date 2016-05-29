@@ -34,11 +34,11 @@
 namespace heap {
 
 /**
- * @class fibonacci
+ * @class Fibonacci
  * @brief Fibonacci Heap data structure
  */
 template<typename K, typename Comparator = std::less<K>>
-class fibonacci {
+class Fibonacci {
  public:
   // Forward declaration
   struct node;
@@ -62,10 +62,10 @@ class fibonacci {
   };
 
   // Constructors
-  fibonacci() : fibonacci({}) {
+  Fibonacci() : Fibonacci({}) {
   }
 
-  explicit fibonacci(std::initializer_list<key_type> keys)
+  explicit Fibonacci(std::initializer_list<key_type> keys)
       : trees(make_trees(keys)), num_elements(keys.size()),
         minimum(search_minimum()),
         cmp([] (const node_ptr& lhs, const node_ptr& rhs) -> bool {
@@ -111,7 +111,7 @@ class fibonacci {
    * Merge copy of nodes of other fibonacci heap in time O(n)
    * @param fh Lkey reference to fibonacci heap to be merged
    */
-  void merge(const fibonacci& fh) {
+  void merge(const Fibonacci& fh) {
     trees.insert(trees.end(), fh.roots().begin(), fh.roots().end());
 
     num_elements += fh.size();
@@ -124,7 +124,7 @@ class fibonacci {
    * Merge nodes of other fibonacci heap in time O(1)
    * @param fh Rkey reference to fibonacci heap to be merged
    */
-  void merge(fibonacci&& fh) {
+  void merge(Fibonacci&& fh) {
     trees.splice(trees.end(), fh.roots());
 
     num_elements += fh.size();
@@ -377,7 +377,7 @@ class fibonacci {
   }
 
   // Friend overloaded operators
-  friend std::ostream& operator<<(std::ostream& os, const fibonacci& fh) {
+  friend std::ostream& operator<<(std::ostream& os, const Fibonacci& fh) {
     fh.print_trees(os, fh.trees);
     return os;
   }

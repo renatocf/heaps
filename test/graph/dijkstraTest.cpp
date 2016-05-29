@@ -20,8 +20,8 @@
 #include "gmock/gmock.h"
 
 // Internal headers
-#include "heap/binary.hpp"
-#include "heap/fibonacci.hpp"
+#include "heap/Binary.hpp"
+#include "heap/Fibonacci.hpp"
 
 // Tested header
 #include "graph/dijkstra.hpp"
@@ -108,82 +108,82 @@ struct AnUndirectedGraph : public ::testing::Test {
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AnEmptyGraph, AbortsWhenCalculatingMinimumPathWithBinaryHeap) {
-  ASSERT_DEATH(graph::dijkstra<heap::binary>(graph, 0, 4), "");
+  ASSERT_DEATH(graph::dijkstra<heap::Binary>(graph, 0, 4), "");
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AnEmptyGraph, AbortsWhenCalculatingMinimumPathWithFibonacciHeap) {
-  ASSERT_DEATH(graph::dijkstra<heap::binary>(graph, 0, 4), "");
+  ASSERT_DEATH(graph::dijkstra<heap::Binary>(graph, 0, 4), "");
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ADirectedGraph, CanFindMinPathBetweenUnconnectedNodesWithBinaryHeap) {
-  auto minimum_path = graph::dijkstra<heap::binary>(graph, 5, 0);
+  auto minimum_path = graph::dijkstra<heap::Binary>(graph, 5, 0);
   ASSERT_THAT(minimum_path, ElementsAre(5));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ADirectedGraph, CanFindMinPathBetweenSameNodeWithBinaryHeap) {
-  auto minimum_path = graph::dijkstra<heap::binary>(graph, 0, 0);
+  auto minimum_path = graph::dijkstra<heap::Binary>(graph, 0, 0);
   ASSERT_THAT(minimum_path, ElementsAre(0));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ADirectedGraph, CanFindMinPathBetweenDistinctNodesWithBinaryHeap) {
-  auto minimum_path = graph::dijkstra<heap::binary>(graph, 0, 4);
+  auto minimum_path = graph::dijkstra<heap::Binary>(graph, 0, 4);
   ASSERT_THAT(minimum_path, ElementsAre(0, 2, 3, 4));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ADirectedGraph, CanFindMinPathBetweenUnconnectedNodesWithFibonacciHeap) {
-  auto minimum_path = graph::dijkstra<heap::fibonacci>(graph, 5, 0);
+  auto minimum_path = graph::dijkstra<heap::Fibonacci>(graph, 5, 0);
   ASSERT_THAT(minimum_path, ElementsAre(5));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ADirectedGraph, CanFindMinPathBetweenSameNodeWithFibonacciHeap) {
-  auto minimum_path = graph::dijkstra<heap::fibonacci>(graph, 0, 0);
+  auto minimum_path = graph::dijkstra<heap::Fibonacci>(graph, 0, 0);
   ASSERT_THAT(minimum_path, ElementsAre(0));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ADirectedGraph, CanFindMinPathBetweenDistinctNodesWithFibonacciHeap) {
-  auto minimum_path = graph::dijkstra<heap::fibonacci>(graph, 0, 4);
+  auto minimum_path = graph::dijkstra<heap::Fibonacci>(graph, 0, 4);
   ASSERT_THAT(minimum_path, ElementsAre(0, 2, 3, 4));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AnUndirectedGraph, CanFindMinPathBetweenSameNodeWithBinaryHeap) {
-  auto minimum_path = graph::dijkstra<heap::binary>(graph, 0, 0);
+  auto minimum_path = graph::dijkstra<heap::Binary>(graph, 0, 0);
   ASSERT_THAT(minimum_path, ElementsAre(0));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AnUndirectedGraph, CanFindMinPathBetweenDistinctNodesWithBinaryHeap) {
-  auto minimum_path = graph::dijkstra<heap::binary>(graph, 0, 4);
+  auto minimum_path = graph::dijkstra<heap::Binary>(graph, 0, 4);
   ASSERT_THAT(minimum_path, ElementsAre(0, 2, 5, 4));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AnUndirectedGraph, CanFindMinPathBetweenSameNodeWithFibonacciHeap) {
-  auto minimum_path = graph::dijkstra<heap::fibonacci>(graph, 0, 0);
+  auto minimum_path = graph::dijkstra<heap::Fibonacci>(graph, 0, 0);
   ASSERT_THAT(minimum_path, ElementsAre(0));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AnUndirectedGraph, CanFindMinPathBetweenDistinctNodesWithFibonacciHeap) {
-  auto minimum_path = graph::dijkstra<heap::fibonacci>(graph, 0, 4);
+  auto minimum_path = graph::dijkstra<heap::Fibonacci>(graph, 0, 4);
   ASSERT_THAT(minimum_path, ElementsAre(0, 2, 5, 4));
 }
 

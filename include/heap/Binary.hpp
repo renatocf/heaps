@@ -32,11 +32,11 @@
 namespace heap {
 
 /**
- * @class binary
- * @brief Fibonacci Heap data structure
+ * @class Binary
+ * @brief Binary Heap data structure
  */
 template<typename K, typename Comparator = std::less<K>>
-class binary {
+class Binary {
  public:
   // Forward declaration
   struct node;
@@ -57,10 +57,10 @@ class binary {
   };
 
   // Constructors
-  binary() : binary({}) {
+  Binary() : Binary({}) {
   }
 
-  explicit binary(std::initializer_list<key_type> keys) {
+  explicit Binary(std::initializer_list<key_type> keys) {
     for (const auto& key : keys)
       heap.emplace_back(new node{key});
     std::make_heap(heap.begin(), heap.end());
@@ -100,7 +100,7 @@ class binary {
    * Merge copy of nodes of other binary heap in time O(n)
    * @param bin Lkey reference to binary heap to be merged
    */
-  void merge(const binary& bin) {
+  void merge(const Binary& bin) {
     auto copy = bin;
     merge(std::move(copy));
   }
@@ -109,7 +109,7 @@ class binary {
    * Merge nodes of other binary heap in time O(n)
    * @param bin Rkey reference to binary heap to be merged
    */
-  void merge(binary&& bin) {
+  void merge(Binary&& bin) {
     heap.insert(heap.end(), bin.nodes().begin(), bin.nodes().end());
     std::make_heap(heap.begin(), heap.end());
   }
@@ -203,7 +203,7 @@ class binary {
   std::vector<node_ptr> heap;
 
   // Friend overloaded operators
-  friend std::ostream& operator<<(std::ostream& os, const binary& bin) {
+  friend std::ostream& operator<<(std::ostream& os, const Binary& bin) {
     auto it = std::begin(bin.nodes());
     auto end = std::end(bin.nodes());
 

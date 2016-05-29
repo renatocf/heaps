@@ -20,10 +20,10 @@
 #include "gmock/gmock.h"
 
 // Tested header
-#include "heap/binary.hpp"
+#include "heap/Binary.hpp"
 
 // Aliases
-using binary_heap = heap::binary<int>;
+using BinaryHeap = heap::Binary<int>;
 
 /*----------------------------------------------------------------------------*/
 /*                             USING DECLARATIONS                             */
@@ -36,16 +36,16 @@ using ::testing::Eq;
 /*----------------------------------------------------------------------------*/
 
 struct ABinaryHeap : public ::testing::Test {
-  binary_heap bin { 3, 5, 8, 13, 21, 34, 55 };
+  BinaryHeap bin { 3, 5, 8, 13, 21, 34, 55 };
 
   // Final heap: (03) (05) (08) (13) (21) (34) (55)
 };
 
 struct AReorganizedBinaryHeap : public ::testing::Test {
-  binary_heap bin;
-  binary_heap::node_ptr node03, node05, node08, node13,
-                        node21, node34, node55, node42,
-                        node24, node33, node72, node88;
+  BinaryHeap bin;
+  BinaryHeap::node_ptr node03, node05, node08, node13,
+                       node21, node34, node55, node42,
+                       node24, node33, node72, node88;
 
   AReorganizedBinaryHeap() : bin() {
     node03 = bin.insert(3);
@@ -69,7 +69,7 @@ struct AReorganizedBinaryHeap : public ::testing::Test {
 /*----------------------------------------------------------------------------*/
 
 TEST(BinaryHeap, CanBeEmptyConstructed) {
-  binary_heap bin;
+  BinaryHeap bin;
 
   ASSERT_THAT(bin.size(), Eq(0u));
   ASSERT_THAT(bin.empty(), Eq(true));
@@ -80,7 +80,7 @@ TEST(BinaryHeap, CanBeEmptyConstructed) {
 /*----------------------------------------------------------------------------*/
 
 TEST(BinaryHeap, CanBeConstructedWithOneElement) {
-  binary_heap bin {1};
+  BinaryHeap bin {1};
 
   ASSERT_THAT(bin.size(), Eq(1u));
   ASSERT_THAT(bin.empty(), Eq(false));
@@ -103,7 +103,7 @@ TEST_F(ABinaryHeap, CanInsertANewNode) {
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ABinaryHeap, CanBeMergedWithCopiedBinaryHeap) {
-  binary_heap oh {1};
+  BinaryHeap oh {1};
   bin.merge(oh);
 
   ASSERT_THAT(bin.size(), Eq(8u));
@@ -114,7 +114,7 @@ TEST_F(ABinaryHeap, CanBeMergedWithCopiedBinaryHeap) {
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ABinaryHeap, CanBeMergedWithMovedBinaryHeap) {
-  binary_heap oh {1};
+  BinaryHeap oh {1};
   bin.merge(std::move(oh));
 
   ASSERT_THAT(bin.size(), Eq(8u));
