@@ -7,7 +7,7 @@
 # ===============
 PROJECT         := Heaps
 VERSION         := 1.0.9
-STD_NAMESPACE   := heap
+STD_NAMESPACE   := # heap
 GIT_REMOTE_PATH :=
 MAINTEINER_NAME := Renato Cordeiro Ferreira
 MAINTEINER_MAIL := renato.cferreira@hotmail.com
