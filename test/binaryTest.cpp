@@ -22,6 +22,9 @@
 // Tested header
 #include "binary.hpp"
 
+// Aliases
+using binary_heap = heap::binary<int>;
+
 /*----------------------------------------------------------------------------*/
 /*                             USING DECLARATIONS                             */
 /*----------------------------------------------------------------------------*/
@@ -33,16 +36,16 @@ using ::testing::Eq;
 /*----------------------------------------------------------------------------*/
 
 struct ABinaryHeap : public ::testing::Test {
-  heap::binary bin { 3, 5, 8, 13, 21, 34, 55 };
+  binary_heap bin { 3, 5, 8, 13, 21, 34, 55 };
 
   // Final heap: (03) (05) (08) (13) (21) (34) (55)
 };
 
 struct AReorganizedBinaryHeap : public ::testing::Test {
-  heap::binary bin;
-  heap::binary::node_ptr node03, node05, node08, node13,
-                         node21, node34, node55, node42,
-                         node24, node33, node72, node88;
+  binary_heap bin;
+  binary_heap::node_ptr node03, node05, node08, node13,
+                        node21, node34, node55, node42,
+                        node24, node33, node72, node88;
 
   AReorganizedBinaryHeap() : bin() {
     node03 = bin.insert(3);
@@ -66,20 +69,22 @@ struct AReorganizedBinaryHeap : public ::testing::Test {
 /*----------------------------------------------------------------------------*/
 
 TEST(BinaryHeap, CanBeEmptyConstructed) {
-  heap::binary bin;
+  binary_heap bin;
 
   ASSERT_THAT(bin.size(), Eq(0u));
-  ASSERT_THAT(bin.find_minimum(), Eq(nullptr));
+  ASSERT_THAT(bin.empty(), Eq(true));
+  ASSERT_THAT(bin.get_minimum(), Eq(nullptr));
   ASSERT_THAT(bin.to_string(), Eq(""));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST(BinaryHeap, CanBeConstructedWithOneElement) {
-  heap::binary bin {1};
+  binary_heap bin {1};
 
   ASSERT_THAT(bin.size(), Eq(1u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(1));
+  ASSERT_THAT(bin.empty(), Eq(false));
+  ASSERT_THAT(bin.find_minimum(), Eq(1));
   ASSERT_THAT(bin.to_string(), Eq("01"));
 }
 
@@ -91,29 +96,29 @@ TEST_F(ABinaryHeap, CanInsertANewNode) {
   bin.insert(1);
 
   ASSERT_THAT(bin.size(), Eq(8u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(1));
+  ASSERT_THAT(bin.find_minimum(), Eq(1));
   ASSERT_THAT(bin.to_string(), Eq("01 03 08 05 21 34 55 13"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ABinaryHeap, CanBeMergedWithCopiedBinaryHeap) {
-  heap::binary oh {1};
+  binary_heap oh {1};
   bin.merge(oh);
 
   ASSERT_THAT(bin.size(), Eq(8u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(1));
+  ASSERT_THAT(bin.find_minimum(), Eq(1));
   ASSERT_THAT(bin.to_string(), Eq("01 03 08 05 21 34 55 13"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(ABinaryHeap, CanBeMergedWithMovedBinaryHeap) {
-  heap::binary oh {1};
+  binary_heap oh {1};
   bin.merge(std::move(oh));
 
   ASSERT_THAT(bin.size(), Eq(8u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(1));
+  ASSERT_THAT(bin.find_minimum(), Eq(1));
   ASSERT_THAT(bin.to_string(), Eq("01 03 08 05 21 34 55 13"));
 }
 
@@ -125,7 +130,7 @@ TEST_F(ABinaryHeap, CanDeleteMinimumElement) {
   ASSERT_THAT(deleted->key, Eq(3));
 
   ASSERT_THAT(bin.size(), Eq(6u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(5));
+  ASSERT_THAT(bin.find_minimum(), Eq(5));
   ASSERT_THAT(bin.to_string(), Eq("05 13 08 55 21 34"));
 }
 
@@ -135,7 +140,7 @@ TEST_F(AReorganizedBinaryHeap, CanDecreaseKeyOfMinimum) {
   bin.decrease_key(node05, 2);
 
   ASSERT_THAT(bin.size(), Eq(9u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(2));
+  ASSERT_THAT(bin.find_minimum(), Eq(2));
   ASSERT_THAT(bin.to_string(), Eq("02 13 08 42 21 34 55 88 72"));
 }
 
@@ -145,7 +150,7 @@ TEST_F(AReorganizedBinaryHeap, CanDecreaseKeyOfNonMinimumRoot) {
   bin.decrease_key(node88, 7);
 
   ASSERT_THAT(bin.size(), Eq(9u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(5));
+  ASSERT_THAT(bin.find_minimum(), Eq(5));
   ASSERT_THAT(bin.to_string(), Eq("05 07 08 13 21 34 55 42 72"));
 }
 
@@ -161,7 +166,7 @@ TEST_F(AReorganizedBinaryHeap, CanDecreaseKeyChangingMinimum) {
   bin.decrease_key(node88, 0);
 
   ASSERT_THAT(bin.size(), Eq(9u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(0));
+  ASSERT_THAT(bin.find_minimum(), Eq(0));
   ASSERT_THAT(bin.to_string(), Eq("00 05 08 13 21 34 55 42 72"));
 }
 
@@ -171,7 +176,7 @@ TEST_F(AReorganizedBinaryHeap, CanRemoveMinimum) {
   bin.remove(node05);
 
   ASSERT_THAT(bin.size(), Eq(8u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(8));
+  ASSERT_THAT(bin.find_minimum(), Eq(8));
   ASSERT_THAT(bin.to_string(), Eq("08 13 34 42 21 72 55 88"));
 }
 
@@ -181,7 +186,7 @@ TEST_F(AReorganizedBinaryHeap, CanRemoveNonMinimumRootNode) {
   bin.remove(node88);
 
   ASSERT_THAT(bin.size(), Eq(8u));
-  ASSERT_THAT(bin.find_minimum()->key, Eq(5));
+  ASSERT_THAT(bin.find_minimum(), Eq(5));
   ASSERT_THAT(bin.to_string(), Eq("05 13 08 42 21 34 55 72"));
 }
 

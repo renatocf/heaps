@@ -35,49 +35,49 @@ namespace heap {
  * @class binary
  * @brief Fibonacci Heap data structure
  */
+template<typename K, typename Comparator = std::less<K>>
 class binary {
  public:
   // Forward declaration
   struct node;
 
   // Aliases
-  using key_type = int;
+  using key_type = K;
   using node_ptr = std::shared_ptr<node>;
 
   // Inner structs
   struct node {
+    // Instance variables
     key_type key;
 
     // Operator overload
-    friend bool operator>(const node_ptr& lhs, const node_ptr& rhs) {
-      return lhs->key > rhs->key;
+    friend bool operator<(const node_ptr& lhs, const node_ptr& rhs) {
+      return Comparator()(rhs->key, lhs->key);
     }
   };
 
   // Constructors
-  binary() = default;
-
-  binary(std::initializer_list<key_type> keys) {
+  binary(std::initializer_list<key_type> keys = {}) {
     for (const auto& key : keys)
       heap.emplace_back(new node{key});
-    std::make_heap(heap.begin(), heap.end(), std::greater<node_ptr>());
+    std::make_heap(heap.begin(), heap.end());
   }
 
   // Concrete methods
 
   /**
-   * Find minimum node in time O(1)
-   * @return Referente to the minimum node
+   * Find minimum key in time O(1)
+   * @return Copy of the minimum key
    */
-  node_ptr find_minimum() {
-    return heap.size() > 0 ? heap.front() : nullptr;
+  key_type find_minimum() const {
+    return get_minimum()->key;
   }
 
   /**
-   * Find minimum node in time O(1)
-   * @return Constant reference to the minimum node
+   * Get minimum node in time O(1)
+   * @return Constant pointer to the minimum node
    */
-  const node_ptr find_minimum() const {
+  node_ptr get_minimum() const {
     return heap.size() > 0 ? heap.front() : nullptr;
   }
 
@@ -89,13 +89,13 @@ class binary {
   node_ptr insert(key_type key) {
     auto new_node = node_ptr(new node{key});
     heap.push_back(new_node);
-    std::push_heap(heap.begin(), heap.end(), std::greater<node_ptr>());
+    std::push_heap(heap.begin(), heap.end());
     return new_node;
   }
 
   /**
    * Merge copy of nodes of other binary heap in time O(n)
-   * @param bin Lvalue reference to binary heap to be merged
+   * @param bin Lkey reference to binary heap to be merged
    */
   void merge(const binary& bin) {
     auto copy = bin;
@@ -104,11 +104,11 @@ class binary {
 
   /**
    * Merge nodes of other binary heap in time O(n)
-   * @param bin Rvalue reference to binary heap to be merged
+   * @param bin Rkey reference to binary heap to be merged
    */
   void merge(binary&& bin) {
     heap.insert(heap.end(), bin.nodes().begin(), bin.nodes().end());
-    std::make_heap(heap.begin(), heap.end(), std::greater<node_ptr>());
+    std::make_heap(heap.begin(), heap.end());
   }
 
   /**
@@ -116,7 +116,7 @@ class binary {
    * @return pointer to the minimum node
    */
   node_ptr delete_minimum() {
-    std::pop_heap(heap.begin(), heap.end(), std::greater<node_ptr>());
+    std::pop_heap(heap.begin(), heap.end());
     auto deleted = heap.back();
     heap.pop_back();
     return deleted;
@@ -134,12 +134,10 @@ class binary {
     }
 
     node->key = new_key;
-    auto modified = std::is_heap_until(heap.begin(), heap.end(),
-                                       std::greater<node_ptr>());
+    auto modified = std::is_heap_until(heap.begin(), heap.end());
     if (modified != heap.end()) {
       std::push_heap(heap.begin(),
-                     heap.begin() + std::distance(heap.begin(), modified) + 1,
-                     std::greater<node_ptr>());
+                     heap.begin() + std::distance(heap.begin(), modified) + 1);
     }
   }
 
@@ -150,6 +148,29 @@ class binary {
   void remove(node_ptr& node) {
     decrease_key(node, std::numeric_limits<key_type>::lowest());
     delete_minimum();
+  }
+
+  /**
+   * @return Number of elements stored in the heap
+   */
+  std::size_t size() const {
+    return heap.size();
+  }
+
+  /**
+   * @return True if heap is empty; false otherwise
+   */
+  bool empty() const {
+    return heap.empty();
+  }
+
+  /**
+   * @return List-like representation of the heap
+   */
+  std::string to_string() const {
+    std::ostringstream oss;
+    operator<<(oss, *this);
+    return oss.str();
   }
 
   /**
@@ -164,22 +185,6 @@ class binary {
    */
   const std::vector<node_ptr>& nodes() const {
     return heap;
-  }
-
-  /**
-   * @return Number of elements stored in the heap
-   */
-  std::size_t size() const {
-    return heap.size();
-  }
-
-  /**
-   * @return List-like representation of the heap
-   */
-  std::string to_string() const {
-    std::ostringstream oss;
-    operator<<(oss, *this);
-    return oss.str();
   }
 
  private:
