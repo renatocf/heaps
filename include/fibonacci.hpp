@@ -29,6 +29,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <functional>
 
 namespace heap {
 
@@ -36,51 +37,55 @@ namespace heap {
  * @class fibonacci
  * @brief Fibonacci Heap data structure
  */
+template<typename K, typename Comparator = std::less<K>>
 class fibonacci {
  public:
   // Forward declaration
   struct node;
 
   // Aliases
-  using key_type = int;
+  using key_type = K;
   using node_ptr = std::shared_ptr<node>;
 
   // Inner structs
   struct node {
     // Instance variables
     key_type key;
-    node_ptr parent = nullptr;
+    std::weak_ptr<node> parent = {};
     std::list<node_ptr> children = {};
     bool marked = false;
+    bool removed = false;
 
     // Concrete methods
-    bool is_root() const { return parent == nullptr; }
+    bool is_root() const { return parent.expired(); }
     size_t rank() const { return children.size(); }
   };
 
   // Constructors
-  fibonacci() = default;
-
-  fibonacci(std::initializer_list<key_type> keys)
+  fibonacci(std::initializer_list<key_type> keys = {})
       : trees(make_trees(keys)), num_elements(keys.size()),
-        minimum(search_minimum()) {
+        minimum(search_minimum()),
+        cmp([] (const node_ptr& lhs, const node_ptr& rhs) -> bool {
+          if (lhs->removed) return true;
+          return Comparator()(lhs->key, rhs->key);
+        }) {
   }
 
   // Concrete methods
 
   /**
-   * Find minimum node in time O(1)
-   * @return Referente to the minimum node
+   * Find minimum key in time O(1)
+   * @return Copy of the minimum key
    */
-  node_ptr find_minimum() {
-    return minimum;
+  key_type find_minimum() const {
+    return get_minimum()->key;
   }
 
   /**
-   * Find minimum node in time O(1)
+   * Get minimum node in time O(1)
    * @return Constant reference to the minimum node
    */
-  const node_ptr find_minimum() const {
+  node_ptr get_minimum() const {
     return minimum;
   }
 
@@ -93,7 +98,7 @@ class fibonacci {
     trees.emplace_back(new node{key});
     num_elements++;
 
-    if (num_elements == 1u || trees.back()->key < minimum->key)
+    if (num_elements == 1u || cmp(trees.back(), minimum))
       minimum = trees.back();
 
     return trees.back();
@@ -101,28 +106,28 @@ class fibonacci {
 
   /**
    * Merge copy of nodes of other fibonacci heap in time O(n)
-   * @param fh Lvalue reference to fibonacci heap to be merged
+   * @param fh Lkey reference to fibonacci heap to be merged
    */
   void merge(const fibonacci& fh) {
     trees.insert(trees.end(), fh.roots().begin(), fh.roots().end());
 
     num_elements += fh.size();
 
-    if (fh.find_minimum()->key < minimum->key)
-      minimum = fh.find_minimum();
+    if (cmp(fh.get_minimum(), minimum))
+      minimum = fh.get_minimum();
   }
 
   /**
    * Merge nodes of other fibonacci heap in time O(1)
-   * @param fh Rvalue reference to fibonacci heap to be merged
+   * @param fh Rkey reference to fibonacci heap to be merged
    */
   void merge(fibonacci&& fh) {
     trees.splice(trees.end(), fh.roots());
 
     num_elements += fh.size();
 
-    if (fh.find_minimum()->key < minimum->key)
-      minimum = fh.find_minimum();
+    if (cmp(fh.get_minimum(), minimum))
+      minimum = fh.get_minimum();
   }
 
   /**
@@ -152,7 +157,7 @@ class fibonacci {
    */
   void decrease_key(node_ptr& node, const key_type& new_key) {
     // Check if key is being decreased
-    if (new_key > node->key) {
+    if (Comparator()(node->key, new_key)) {
       std::ostringstream oss;
       oss << "Key " << new_key << " is bigger current key " << node->key;
       throw std::invalid_argument(oss.str());
@@ -160,18 +165,19 @@ class fibonacci {
 
     // Set new key
     node->key = new_key;
-    if (node->key < minimum->key)
+    if (cmp(node, minimum))
       minimum = node;
 
     // Node is root: nothing to do
     if (node->is_root()) return;
 
     // Heap property not violated: nothing to do
-    if (node->parent->key < node->key) return;
+    auto parent = node->parent.lock();
+    if (cmp(parent, node)) return;
 
     // 1st child to violate heap property: parent is marked and node is cut
-    if (!node->parent->marked) {
-      mark(node->parent);
+    if (!parent->marked) {
+      mark(parent);
       cut(node);
       return;
     }
@@ -185,8 +191,32 @@ class fibonacci {
    * @param node Pointer to node to be deleted
    */
   void remove(node_ptr& node) {
-    decrease_key(node, std::numeric_limits<key_type>::lowest());
+    node->removed = true;
+    decrease_key(node, node->key);
     delete_minimum();
+  }
+
+  /**
+   * @return Number of elements stored in the heap
+   */
+  std::size_t size() const {
+    return num_elements;
+  }
+
+  /**
+   * @return True if heap is empty; false otherwise
+   */
+  bool empty() const {
+    return num_elements == 0u;
+  }
+
+  /**
+   * @return SExpr-like representation of the heap
+   */
+  std::string to_string() const {
+    std::ostringstream oss;
+    operator<<(oss, *this);
+    return oss.str();
   }
 
   /**
@@ -203,27 +233,13 @@ class fibonacci {
     return trees;
   }
 
-  /**
-   * @return Number of elements stored in the heap
-   */
-  std::size_t size() const {
-    return num_elements;
-  }
-
-  /**
-   * @return SExpr list representating strings
-   */
-  std::string to_string() const {
-    std::ostringstream oss;
-    operator<<(oss, *this);
-    return oss.str();
-  }
-
  private:
   // Instance variables
   std::list<node_ptr> trees;
   size_t num_elements = 0;
   node_ptr minimum;
+
+  std::function<bool(const node_ptr&, const node_ptr&)> cmp;
 
   // Concrete methods
 
@@ -244,8 +260,9 @@ class fibonacci {
    * @return Pointer to the minimum node
    */
   node_ptr search_minimum() const {
-    return *std::min_element(trees.begin(), trees.end(),
+    auto it = std::min_element(trees.begin(), trees.end(),
         [](const auto& a, const auto& b) { return a->key < b->key; });
+    return it != trees.end() ? *it : nullptr;
   }
 
   /**
@@ -253,7 +270,7 @@ class fibonacci {
    * @return Reference to the root node
    */
   const node_ptr& link(const node_ptr& lhs, const node_ptr& rhs) const {
-    if (lhs->key <= rhs-> key) {
+    if (lhs->key <= rhs->key) {
       lhs->children.push_back(rhs);
       rhs->parent = lhs;
       return lhs;
@@ -268,6 +285,8 @@ class fibonacci {
    * Shrinks root list to O(lg n) elements
    */
   void consolidate() {
+    if (num_elements == 0) return;
+
     auto max_rank = static_cast<size_t>(std::floor(std::log2(num_elements)));
 
     using node_list_iterator = typename std::list<node_ptr>::iterator;
@@ -297,10 +316,10 @@ class fibonacci {
    * @param node Node to be cut
    */
   void cut(node_ptr& node) {
-    node->parent->children.remove(node);
+    node->parent.lock()->children.remove(node);
     trees.push_back(node);
     node->marked = false;
-    node->parent = nullptr;
+    node->parent.reset();
   }
 
   /**
@@ -317,12 +336,13 @@ class fibonacci {
    * @param node Node that will start cascading cut
    */
   void cascade_cut(node_ptr node) {
-    while (!node->is_root() && node->parent->marked) {
-      auto parent = node->parent;
+    while (!node->is_root() && node->parent.lock()->marked) {
+      auto parent = node->parent.lock();
       cut(node);
       node = parent;
     }
-    mark(node->parent);
+    auto parent = node->parent.lock();
+    mark(parent);
     cut(node);
   }
 

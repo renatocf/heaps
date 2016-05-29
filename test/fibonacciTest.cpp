@@ -22,6 +22,9 @@
 // Tested header
 #include "fibonacci.hpp"
 
+// Aliases
+using fibonacci_heap = heap::fibonacci<int>;
+
 /*----------------------------------------------------------------------------*/
 /*                             USING DECLARATIONS                             */
 /*----------------------------------------------------------------------------*/
@@ -33,29 +36,29 @@ using ::testing::Eq;
 /*----------------------------------------------------------------------------*/
 
 struct AFibonacciHeap : public ::testing::Test {
-  heap::fibonacci fh { 3, 5, 8, 13, 21, 34, 55 };
+  fibonacci_heap fib { 3, 5, 8, 13, 21, 34, 55 };
 
   // Final heap: (03) (05) (08) (13) (21) (34) (55)
 };
 
 struct AReorganizedFibonacciHeap : public ::testing::Test {
-  heap::fibonacci fh;
-  heap::fibonacci::node_ptr node03, node05, node08, node13,
-                            node21, node34, node55, node42,
-                            node24, node33, node72, node88;
+  fibonacci_heap fib;
+  fibonacci_heap::node_ptr node03, node05, node08, node13,
+                           node21, node34, node55, node42,
+                           node24, node33, node72, node88;
 
-  AReorganizedFibonacciHeap() : fh() {
-    node03 = fh.insert(3);
-    node05 = fh.insert(5);
-    node08 = fh.insert(8);
-    node13 = fh.insert(13);
-    node21 = fh.insert(21);
-    node34 = fh.insert(34);
-    node55 = fh.insert(55);
-    node42 = fh.insert(42);
-    node72 = fh.insert(72);
-    node88 = fh.insert(88);
-    fh.delete_minimum();  // To reorganize heap
+  AReorganizedFibonacciHeap() : fib() {
+    node03 = fib.insert(3);
+    node05 = fib.insert(5);
+    node08 = fib.insert(8);
+    node13 = fib.insert(13);
+    node21 = fib.insert(21);
+    node34 = fib.insert(34);
+    node55 = fib.insert(55);
+    node42 = fib.insert(42);
+    node72 = fib.insert(72);
+    node88 = fib.insert(88);
+    fib.delete_minimum();  // To reorganize heap
   }
 
   // Final heap: (05 (08) (13 (21)) (34 (55) (42 (72)))) (88)
@@ -66,21 +69,23 @@ struct AReorganizedFibonacciHeap : public ::testing::Test {
 /*----------------------------------------------------------------------------*/
 
 TEST(FibonacciHeap, CanBeEmptyConstructed) {
-  heap::fibonacci fh;
+  fibonacci_heap fib;
 
-  ASSERT_THAT(fh.size(), Eq(0u));
-  ASSERT_THAT(fh.find_minimum(), Eq(nullptr));
-  ASSERT_THAT(fh.to_string(), Eq(""));
+  ASSERT_THAT(fib.size(), Eq(0u));
+  ASSERT_THAT(fib.empty(), Eq(true));
+  ASSERT_THAT(fib.get_minimum(), Eq(nullptr));
+  ASSERT_THAT(fib.to_string(), Eq(""));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST(FibonacciHeap, CanBeConstructedWithOneElement) {
-  heap::fibonacci fh {1};
+  fibonacci_heap fib {1};
 
-  ASSERT_THAT(fh.size(), Eq(1u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(1));
-  ASSERT_THAT(fh.to_string(), Eq("(01)"));
+  ASSERT_THAT(fib.size(), Eq(1u));
+  ASSERT_THAT(fib.empty(), Eq(false));
+  ASSERT_THAT(fib.find_minimum(), Eq(1));
+  ASSERT_THAT(fib.to_string(), Eq("(01)"));
 }
 
 /*----------------------------------------------------------------------------*/
@@ -88,127 +93,127 @@ TEST(FibonacciHeap, CanBeConstructedWithOneElement) {
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AFibonacciHeap, CanInsertANewNode) {
-  fh.insert(1);
+  fib.insert(1);
 
-  ASSERT_THAT(fh.size(), Eq(8u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(1));
-  ASSERT_THAT(fh.to_string(), Eq("(03) (05) (08) (13) (21) (34) (55) (01)"));
+  ASSERT_THAT(fib.size(), Eq(8u));
+  ASSERT_THAT(fib.find_minimum(), Eq(1));
+  ASSERT_THAT(fib.to_string(), Eq("(03) (05) (08) (13) (21) (34) (55) (01)"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AFibonacciHeap, CanBeMergedWithCopiedFibonacciHeap) {
-  heap::fibonacci oh {1};
-  fh.merge(oh);
+  fibonacci_heap oh {1};
+  fib.merge(oh);
 
-  ASSERT_THAT(fh.size(), Eq(8u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(1));
-  ASSERT_THAT(fh.to_string(), Eq("(03) (05) (08) (13) (21) (34) (55) (01)"));
+  ASSERT_THAT(fib.size(), Eq(8u));
+  ASSERT_THAT(fib.find_minimum(), Eq(1));
+  ASSERT_THAT(fib.to_string(), Eq("(03) (05) (08) (13) (21) (34) (55) (01)"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AFibonacciHeap, CanBeMergedWithMovedFibonacciHeap) {
-  heap::fibonacci oh {1};
-  fh.merge(std::move(oh));
+  fibonacci_heap oh {1};
+  fib.merge(std::move(oh));
 
-  ASSERT_THAT(fh.size(), Eq(8u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(1));
-  ASSERT_THAT(fh.to_string(), Eq("(03) (05) (08) (13) (21) (34) (55) (01)"));
+  ASSERT_THAT(fib.size(), Eq(8u));
+  ASSERT_THAT(fib.find_minimum(), Eq(1));
+  ASSERT_THAT(fib.to_string(), Eq("(03) (05) (08) (13) (21) (34) (55) (01)"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AFibonacciHeap, CanDeleteMinimumElement) {
-  auto deleted = fh.delete_minimum();
+  auto deleted = fib.delete_minimum();
 
   ASSERT_THAT(deleted->key, Eq(3));
 
-  ASSERT_THAT(fh.size(), Eq(6u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(5));
-  ASSERT_THAT(fh.to_string(), Eq("(05 (08) (13 (21))) (34 (55))"));
+  ASSERT_THAT(fib.size(), Eq(6u));
+  ASSERT_THAT(fib.find_minimum(), Eq(5));
+  ASSERT_THAT(fib.to_string(), Eq("(05 (08) (13 (21))) (34 (55))"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, CanDecreaseKeyOfMinimum) {
-  fh.decrease_key(node05, 2);
+  fib.decrease_key(node05, 2);
 
-  ASSERT_THAT(fh.size(), Eq(9u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(2));
-  ASSERT_THAT(fh.to_string(),
+  ASSERT_THAT(fib.size(), Eq(9u));
+  ASSERT_THAT(fib.find_minimum(), Eq(2));
+  ASSERT_THAT(fib.to_string(),
       Eq("(02 (08) (13 (21)) (34 (55) (42 (72)))) (88)"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, CanDecreaseKeyOfNonMinimumRoot) {
-  fh.decrease_key(node88, 7);
+  fib.decrease_key(node88, 7);
 
-  ASSERT_THAT(fh.size(), Eq(9u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(5));
-  ASSERT_THAT(fh.to_string(),
+  ASSERT_THAT(fib.size(), Eq(9u));
+  ASSERT_THAT(fib.find_minimum(), Eq(5));
+  ASSERT_THAT(fib.to_string(),
       Eq("(05 (08) (13 (21)) (34 (55) (42 (72)))) (07)"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, ThrowsWhenNodeKeyIsBiggerThanCurrentKey) {
-  ASSERT_THROW(fh.decrease_key(node88, 90), std::invalid_argument);
+  ASSERT_THROW(fib.decrease_key(node88, 90), std::invalid_argument);
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, CanDecreaseKeyChangingMinimum) {
-  fh.decrease_key(node88, 0);
+  fib.decrease_key(node88, 0);
 
-  ASSERT_THAT(fh.size(), Eq(9u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(0));
-  ASSERT_THAT(fh.to_string(),
+  ASSERT_THAT(fib.size(), Eq(9u));
+  ASSERT_THAT(fib.find_minimum(), Eq(0));
+  ASSERT_THAT(fib.to_string(),
       Eq("(05 (08) (13 (21)) (34 (55) (42 (72)))) (00)"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, CanDecreaseKeyOfNonRootWithUnmarkedParent) {
-  fh.decrease_key(node42, 7);
+  fib.decrease_key(node42, 7);
 
-  ASSERT_THAT(fh.size(), Eq(9u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(5));
-  ASSERT_THAT(fh.to_string(),
+  ASSERT_THAT(fib.size(), Eq(9u));
+  ASSERT_THAT(fib.find_minimum(), Eq(5));
+  ASSERT_THAT(fib.to_string(),
       Eq("(05 (08) (13 (21)) (34* (55))) (88) (07 (72))"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, CanDecreaseKeyOfNonRootWithMarkedParent) {
-  fh.decrease_key(node42, 7);
-  fh.decrease_key(node55, 6);
+  fib.decrease_key(node42, 7);
+  fib.decrease_key(node55, 6);
 
-  ASSERT_THAT(fh.size(), Eq(9u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(5));
-  ASSERT_THAT(fh.to_string(),
+  ASSERT_THAT(fib.size(), Eq(9u));
+  ASSERT_THAT(fib.find_minimum(), Eq(5));
+  ASSERT_THAT(fib.to_string(),
       Eq("(05 (08) (13 (21))) (88) (07 (72)) (06) (34)"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, CanRemoveMinimum) {
-  fh.remove(node05);
+  fib.remove(node05);
 
-  ASSERT_THAT(fh.size(), Eq(8u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(8));
-  ASSERT_THAT(fh.to_string(), Eq("(08 (88) (13 (21)) (34 (55) (42 (72))))"));
+  ASSERT_THAT(fib.size(), Eq(8u));
+  ASSERT_THAT(fib.find_minimum(), Eq(8));
+  ASSERT_THAT(fib.to_string(), Eq("(08 (88) (13 (21)) (34 (55) (42 (72))))"));
 }
 
 /*----------------------------------------------------------------------------*/
 
 TEST_F(AReorganizedFibonacciHeap, CanRemoveNonMinimumRootNode) {
-  fh.remove(node88);
+  fib.remove(node88);
 
-  ASSERT_THAT(fh.size(), Eq(8u));
-  ASSERT_THAT(fh.find_minimum()->key, Eq(5));
-  ASSERT_THAT(fh.to_string(), Eq("(05 (08) (13 (21)) (34 (55) (42 (72))))"));
+  ASSERT_THAT(fib.size(), Eq(8u));
+  ASSERT_THAT(fib.find_minimum(), Eq(5));
+  ASSERT_THAT(fib.to_string(), Eq("(05 (08) (13 (21)) (34 (55) (42 (72))))"));
 }
 
 /*----------------------------------------------------------------------------*/
