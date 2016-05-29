@@ -20,7 +20,7 @@
 #include "gmock/gmock.h"
 
 // Tested header
-#include "binary.hpp"
+#include "heap/binary.hpp"
 
 // Aliases
 using binary_heap = heap::binary<int>;
@@ -124,10 +124,22 @@ TEST_F(ABinaryHeap, CanBeMergedWithMovedBinaryHeap) {
 
 /*----------------------------------------------------------------------------*/
 
-TEST_F(ABinaryHeap, CanDeleteMinimumElement) {
-  auto deleted = bin.delete_minimum();
+TEST_F(ABinaryHeap, CanRemoveMinimumElement) {
+  auto deleted_node = bin.remove_minimum();
 
-  ASSERT_THAT(deleted->key, Eq(3));
+  ASSERT_THAT(deleted_node->key, Eq(3));
+
+  ASSERT_THAT(bin.size(), Eq(6u));
+  ASSERT_THAT(bin.find_minimum(), Eq(5));
+  ASSERT_THAT(bin.to_string(), Eq("05 13 08 55 21 34"));
+}
+
+/*----------------------------------------------------------------------------*/
+
+TEST_F(ABinaryHeap, CanDeleteMinimumElement) {
+  auto deleted_key = bin.delete_minimum();
+
+  ASSERT_THAT(deleted_key, Eq(3));
 
   ASSERT_THAT(bin.size(), Eq(6u));
   ASSERT_THAT(bin.find_minimum(), Eq(5));

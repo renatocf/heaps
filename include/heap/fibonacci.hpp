@@ -135,9 +135,17 @@ class fibonacci {
 
   /**
    * Delete minimum node in amortized time O(D) = O(lg n)
+   * @return minimum value stored in the minimum node
+   */
+  key_type delete_minimum() {
+    return remove_minimum()->key;
+  }
+
+  /**
+   * Remove minimum node in amortized time O(D) = O(lg n)
    * @return pointer to the minimum node
    */
-  node_ptr delete_minimum() {
+  node_ptr remove_minimum() {
     // Phase 1: remove minimum and merge its children as roots [T(n) = O(lg n)]
     auto deleted = minimum;
     trees.remove(deleted);

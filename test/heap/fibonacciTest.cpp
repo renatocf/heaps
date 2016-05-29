@@ -20,7 +20,7 @@
 #include "gmock/gmock.h"
 
 // Tested header
-#include "fibonacci.hpp"
+#include "heap/fibonacci.hpp"
 
 // Aliases
 using fibonacci_heap = heap::fibonacci<int>;
@@ -124,10 +124,22 @@ TEST_F(AFibonacciHeap, CanBeMergedWithMovedFibonacciHeap) {
 
 /*----------------------------------------------------------------------------*/
 
-TEST_F(AFibonacciHeap, CanDeleteMinimumElement) {
-  auto deleted = fib.delete_minimum();
+TEST_F(AFibonacciHeap, CanRemoveMinimumElement) {
+  auto deleted_node = fib.remove_minimum();
 
-  ASSERT_THAT(deleted->key, Eq(3));
+  ASSERT_THAT(deleted_node->key, Eq(3));
+
+  ASSERT_THAT(fib.size(), Eq(6u));
+  ASSERT_THAT(fib.find_minimum(), Eq(5));
+  ASSERT_THAT(fib.to_string(), Eq("(05 (08) (13 (21))) (34 (55))"));
+}
+
+/*----------------------------------------------------------------------------*/
+
+TEST_F(AFibonacciHeap, CanDeleteMinimumElement) {
+  auto deleted_key = fib.delete_minimum();
+
+  ASSERT_THAT(deleted_key, Eq(3));
 
   ASSERT_THAT(fib.size(), Eq(6u));
   ASSERT_THAT(fib.find_minimum(), Eq(5));

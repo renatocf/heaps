@@ -116,9 +116,17 @@ class binary {
 
   /**
    * Delete minimum node in time O(lg n)
+   * @return minimum value stored in the minimum node
+   */
+  key_type delete_minimum() {
+    return remove_minimum()->key;
+  }
+
+  /**
+   * Remove minimum node in time O(lg n)
    * @return pointer to the minimum node
    */
-  node_ptr delete_minimum() {
+  node_ptr remove_minimum() {
     std::pop_heap(heap.begin(), heap.end());
     auto deleted = heap.back();
     heap.pop_back();
