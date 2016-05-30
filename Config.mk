@@ -19,16 +19,18 @@ DESCRIPTION     := Heaps - a heap library implementing heaps \
 
 # Program settings
 # ==================
+BENCHBIN        := benchmark
 SHRLIB          := # one is a dir, all srcs within will
 
 # Flags
 # =======
 CPPFLAGS        := # Precompiler Flags
-CXXFLAGS        := -std=c++14 -Wall -Wextra -Wpedantic
-LDFLAGS         := # Linker flags
+CXXFLAGS        := -std=c++14 -Wall -Wextra -Wpedantic -g
+LDFLAGS         := -g # Linker flags
 
 # Makeball list
 # ===============
 # 'include conf/makeball.mk' for pre-configured options
 # to use the library 'makeball'
 include conf/googletest.mk
+include conf/googlebenchmark.mk
